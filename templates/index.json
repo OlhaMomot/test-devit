@@ -104,8 +104,8 @@
         "content_alignment": "left",
         "padding_top": 36,
         "padding_bottom": 36,
-        "padding_left": 36,
-        "padding_right": 36,
+        "padding_left": 0,
+        "padding_right": 0,
         "products": [
           "extreme-ski-jacket",
           "gloves",
@@ -120,7 +120,7 @@
         "text_fDAMnn": {
           "type": "text",
           "settings": {
-            "text": "<p>Section text<\/p>",
+            "text": "<p>Gear up for the slopes with our top-of-the-line men's ski clothes, built to withstand the harshest winter conditions. Combining durability with sleek design, our collection ensures you stay warm, dry, and ready to conquer any mountain. Elevate your performance with gear that delivers both style and substance.<\/p>",
             "text_size": "medium"
           }
         },
@@ -136,14 +136,18 @@
         "button_HyN9PG"
       ],
       "settings": {
-        "layout": "image_first",
-        "content_alignment": "left",
+        "image": "shopify:\/\/shop_images\/kha_interstellar_ii_ski_jacket_men_ecom_lifestyle_aw22_01.webp",
+        "layout": "text_first",
+        "content_alignment": "right",
         "padding_top": 36,
         "padding_bottom": 36,
-        "padding_left": 36,
-        "padding_right": 36,
+        "padding_left": 0,
+        "padding_right": 0,
         "products": [
-
+          "gloves-1",
+          "beanie",
+          "the-collection-snowboard-liquid",
+          "googles"
         ]
       }
     }
