@@ -1,0 +1,298 @@
+.lookbook--wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.lookbook-image {
+  width: 100%;
+}
+
+.lookbook-image img {
+  width: 100%;
+  object-fit: cover;
+}
+
+.lookbook-text-content {
+  font-size: 16px;
+}
+
+.lookbook-text-content.text-center {
+  text-align: center;
+}
+
+.lookbook-text-content.text-right {
+  text-align: end;
+}
+
+.lookbook-text-content .text-small {
+  font-size: 12px;
+}
+
+.lookbook-text-content .text-large {
+  font-size: 20px;
+}
+
+.lookbook-modal {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  z-index: 10;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.lookbook-modal--content {
+  width: 90%;
+  max-width: 1200px;
+  max-height: 90vh;
+  background: #fff;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.lookbook-modal-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lookbook-modal-products {
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+}
+
+.lookbook-modal-products::-webkit-scrollbar,
+.lookbook-modal-products::-webkit-scrollbar-track {
+  display: none;
+}
+
+.lookbook-modal-product {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  height: 30%;
+}
+
+.lookbook-modal-product:not(:last-of-type) {
+  border-bottom: 2px solid rgba(0, 0, 0, 0.4);
+}
+
+.lookbook-modal-product-image {
+  max-width: 100%;
+  height: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;  
+}
+
+.lookbook-modal-product-image img {
+  width: 100%; 
+  object-fit: contain;
+  object-position: center;
+  max-width: 300px;
+  max-height: 400px;
+}
+
+.lookbook-product-card-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  padding: 15px;
+}
+
+.lookbook-product-card-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.lookbook-modal-price {
+  display: flex;
+  flex-wrap: wrap;
+  width: min-content;
+  font-size: 16px;
+  line-height: 18px;
+  font-weight: bold;
+  color: #000;
+}
+
+.lookbook-modal-final-price {
+  color: red;
+}
+
+.lookbook-modal-compare-price {
+  text-decoration: line-through;
+}
+
+.lookbook-modal-product h5 {
+  margin: 0 0 5px;
+  font-size: 18px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.lookbook-modal-product p {
+  margin: 0 0 10px;
+  font-size: 14px;
+}
+
+.lookbook-modal-product select {
+  margin-top: 10px;
+  padding: 5px;
+  border-width: 0;
+}
+
+.lookbook-variant-select {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.lookbook-variant--one {
+  color: #000;
+  font-size: 14px;
+  line-height: 16px;
+  font-weight: bold;
+}
+
+.lookbook-cart-buttons {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+}
+
+.lookbook-atc-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  margin-top: 10px;
+  height: 40px;
+  width: 100%;
+  background-color: #fff;
+  border: 1px solid #000;
+  line-height: 30px;
+  cursor: pointer;
+}
+
+.lookbook-atc-button span {
+  font-size: 14px;
+  line-height: 16px;
+  font-weight: 600;
+}
+
+.lookbook-modal-close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+}
+
+.loader {
+  display: none;
+  width: 4px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  animation: l5 1s infinite linear alternate;
+}
+
+@keyframes l5 {
+    0%  {box-shadow: 20px 0 #000, -20px 0 #0002;background: #000 }
+    33% {box-shadow: 20px 0 #000, -20px 0 #0002;background: #0002}
+    66% {box-shadow: 20px 0 #0002,-20px 0 #000; background: #0002}
+    100%{box-shadow: 20px 0 #0002,-20px 0 #000; background: #000 }
+}
+
+@media screen and (min-width: 768px) {
+  .lookbook--wrapper {
+    flex-direction: row;
+    gap: 40px;
+    align-items: center;
+  }
+
+  .lookbook--wrapper.reversed {
+    flex-direction: row-reverse;
+  }
+
+  .lookbook-image {
+    width: 50%;
+    flex-shrink: 0;
+  }
+
+  .lookbook-modal--content {
+    flex-direction: row;
+    padding: 30px;
+    overflow-y: unset;
+  }
+
+  .lookbook-modal-image {
+    max-width: 50%;
+    margin-right: 20px;
+  }  
+
+  .lookbook-modal-products {
+    max-width: 50%;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .lookbook-modal-product {
+    padding-block: 20px;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .lookbook-modal-product-image {
+    flex: 1;
+    height: 100%;
+    margin-right: 15px;
+  }
+
+  .lookbook-product-card-content {
+    flex: 1.5;
+    padding-block: 20px;
+  }
+
+  .lookbook-modal-product-image img {
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  .lookbook-modal-product h5 {
+    font-size: 16px;
+  }
+
+  .lookbook-modal-product p {
+    font-size: 14px;
+  }
+
+  .lookbook-modal-product select {
+    margin-left: auto;
+    flex-shrink: 0;
+    width: auto;
+  }
+
+  .lookbook-variant-select {
+    font-size: 16px;
+  }
+
+  .lookbook-variant--one {
+    font-size: 16px;
+    line-height: 18px;
+  }
+
+  .lookbook-atc-button span {
+    font-size: 16px;
+    line-height: 18px;
+  }
+}

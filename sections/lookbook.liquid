@@ -1,0 +1,377 @@
+{{ 'component-lookbook.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+    padding-left: {{ section.settings.padding_left | times: 0.75 | round: 0 }}px;
+    padding-right: {{ section.settings.padding_right | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+      padding-left: {{ section.settings.padding_left }}px;
+      padding-right: {{ section.settings.padding_right }}px;
+    }
+  }
+{%- endstyle -%}
+
+<div class="section-{{ section.id }}-padding color-{{ section.settings.section_color_scheme }}">
+  <div class="page-width lookbook--wrapper {% if section.settings.layout == 'text_first' %}reversed{% endif %}">
+    <div class="lookbook-image">
+      <img src="{{ section.settings.image | image_url }}" alt="lookbook featured image">
+    </div>
+
+    <div class="lookbook-text-content {% if section.settings.content_alignment == 'center' %} text-center {% elsif section.settings.content_alignment == 'right' %} text-right {% endif %}">
+      {% for block in section.blocks %}
+        {% case block.type %}
+          {% when 'text' %}
+            <div class="{% if block.settings.text_size == 'small' %} text-small {% elsif block.settings.text_size == 'large' %}text-large{% endif %}">
+              {{ block.settings.text }}
+            </div>
+
+          {% when 'button' %}
+            <button
+              class="button lookbook-modal-button lookbook-modal-open-{{ section.id }}"
+              aria-controls="lookbook-modal-{{ section.id }}"
+              aria-expanded="false"
+            >
+              {{ block.settings.button_label }}
+            </button>
+        {% endcase %}
+      {% endfor %}
+    </div>
+  </div>
+
+  <div
+    class="lookbook-modal lookbook-modal-{{section.id}} hidden"
+    role="dialog"
+    aria-modal="true"
+    id="lookbook-modal-{{ section.id }}"
+    aria-labelledby="lookbook-modal-title-{{ section.id }}"
+  >
+    <div class="lookbook-modal--content">
+      <div class="lookbook-modal-image">
+        <img src="{{ section.settings.image | image_url }}" alt="{{ section.settings.image.alt | escape }}">
+      </div>
+
+      <div class="lookbook-modal-products">
+        {% for product in section.settings.products %}
+          <div class="lookbook-modal-product" data-variant-id="{{ product.selected_or_first_available_variant.id }}">
+            <div class="lookbook-modal-product-image">
+              <img src="{{ product.featured_image | image_url }}" alt="{{ product.title }}">
+            </div>
+
+            <div class="lookbook-product-card-content">
+              <div>
+                <div class="lookbook-product-card-header">
+                  <h5 id="lookbook-modal-title-{{ section.id }}">{{ product.title }}</h5>
+
+                  {% if product.compare_at_price > product.price %}
+                    <div class="lookbook-modal-price">
+                      <span class="lookbook-modal-final-price">{{ product.price | money_without_trailing_zeros }}</span>
+                      <span class="lookbook-modal-compare-price">
+                        {{- product.compare_at_price | money_without_trailing_zeros -}}
+                      </span>
+                    </div>
+                  {% else %}
+                    <div class="lookbook-modal-price">
+                      <span class="">{{ product.price | money_without_trailing_zeros }}</span>
+                    </div>
+                  {% endif %}
+                </div>
+
+                <p>{{ product.description }}</p>
+              </div>
+
+              <div class="lookbook-cart-buttons">
+                {% if product.variants.size > 1 %}
+                  <select class="lookbook-variant-select">
+                    {% for variant in product.variants %}
+                      <option
+                        value="{{ variant.id }}"
+                        class="lookbook-variant"
+                      >
+                        {{ variant.title }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                {% else %}
+                  <div
+                    class="lookbook-variant--one"
+                  >
+                    One Size
+                  </div>
+                {% endif %}
+
+                <button class="lookbook-atc-button">
+                  <div class="loader"></div>
+                  <span>Add to bag</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+
+        <img
+          src="{{ "icon-close-small.svg" | asset_url }} "
+          alt="close icon"
+          class="lookbook-modal-close-btn modal-close-{{ section.id }}"
+          aria-label="Close"
+        >
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const openModalButtons = document.querySelectorAll('.lookbook-modal-open-{{ section.id }}');
+    const modal = document.querySelector('.lookbook-modal-{{ section.id }}');
+    const closeModalButton = document.querySelector('.modal-close-{{ section.id }}');
+
+    function openModal() {
+      modal.classList.remove('hidden');
+      openModalButtons.forEach((button) => button.setAttribute('aria-expanded', 'true'));
+      closeModalButton.focus(); // Move focus to close button for accessibility
+    }
+
+    function closeModal() {
+      modal.classList.add('hidden');
+      openModalButtons.forEach((button) => button.setAttribute('aria-expanded', 'false'));
+      openModalButtons[0].focus(); // Return focus to the first button that opened the modal
+    }
+
+    openModalButtons.forEach(function (button) {
+      button.addEventListener('click', openModal);
+    });
+
+    closeModalButton.addEventListener('click', function (event) {
+      closeModal();
+    });
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
+        closeModal();
+      }
+    });
+
+    const atcButtons = document.querySelectorAll('.lookbook-atc-button');
+
+    atcButtons.forEach((button) => {
+      button.addEventListener('click', (event) => {
+        const loader = button.querySelector('.loader');
+        const buttonText = button.querySelector('span');
+        const productCard = event.target.closest('.lookbook-modal-product');
+        const variantSelect = productCard.querySelector('.lookbook-variant-select');
+
+        // If there's a variant selector, using its value; otherwise, get the single variant ID
+        const selectedVariantId = variantSelect ? variantSelect.value : productCard.dataset.variantId;
+
+        if (!selectedVariantId) return;
+
+        buttonText.innerText = '';
+        loader.style.display = 'block';
+
+        let formData = {
+          items: [
+            {
+              id: selectedVariantId,
+              quantity: 1,
+            },
+          ],
+        };
+
+        fetch(window.Shopify.routes.root + 'cart/add.js', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+        })
+          .then((response) => {
+            loader.style.display = 'none';
+            buttonText.innerText = 'Added';
+            return response.json();
+          })
+          .catch((error) => {
+            console.error('Error:', error);
+          });
+
+        variantSelect.addEventListener('change', () => {
+          buttonText.innerText = 'Add to bag';
+        });
+      });
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Lookbook",
+  "class": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "t:sections.image-with-text.settings.image.label"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "options": [
+        {
+          "value": "image_first",
+          "label": "t:sections.image-with-text.settings.layout.options__1.label"
+        },
+        {
+          "value": "text_first",
+          "label": "t:sections.image-with-text.settings.layout.options__2.label"
+        }
+      ],
+      "default": "image_first",
+      "label": "t:sections.image-with-text.settings.layout.label",
+      "info": "t:sections.image-with-text.settings.layout.info"
+    },
+    {
+      "type": "select",
+      "id": "content_alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:sections.image-with-text.settings.desktop_content_alignment.options__1.label"
+        },
+        {
+          "value": "center",
+          "label": "t:sections.image-with-text.settings.desktop_content_alignment.options__2.label"
+        },
+        {
+          "value": "right",
+          "label": "t:sections.image-with-text.settings.desktop_content_alignment.options__3.label"
+        }
+      ],
+      "default": "left",
+      "label": "Content alignment"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_left",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding left",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_right",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding right",
+      "default": 36
+    },
+    {
+      "type": "header",
+      "content": "Modal block"
+    },
+    {
+      "type": "product_list",
+      "id": "products",
+      "label": "Products for modal block"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "text",
+      "name": "Text",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text",
+          "default": "<p>Section text<\/p>",
+          "label": "Section text"
+        },
+        {
+          "type": "select",
+          "id": "text_size",
+          "options": [
+            {
+              "value": "small",
+              "label": "t:sections.image-with-text.blocks.caption.settings.caption_size.options__1.label"
+            },
+            {
+              "value": "medium",
+              "label": "t:sections.image-with-text.blocks.caption.settings.caption_size.options__2.label"
+            },
+            {
+              "value": "large",
+              "label": "t:sections.image-with-text.blocks.caption.settings.caption_size.options__3.label"
+            }
+          ],
+          "default": "medium",
+          "label": "t:sections.image-with-text.blocks.caption.settings.caption_size.label"
+        }
+      ]
+    },
+    {
+      "type": "button",
+      "name": "Button",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "button_label",
+          "default": "Shop the look",
+          "label": "Button text"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Lookbook",
+      "blocks": [
+        {
+          "type": "text"
+        },
+        {
+          "type": "button"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
