@@ -46,6 +46,7 @@
 }
 
 .lookbook-modal--content {
+  width: 90%;
   max-width: 1200px;
   max-height: 90vh;
   background: #fff;
@@ -143,6 +144,7 @@
 }
 
 .lookbook-modal-product select {
+  margin-top: 10px;
   padding: 5px;
   border-width: 0;
 }
@@ -182,6 +184,7 @@
 
 .lookbook-atc-button span {
   font-size: 14px;
+  line-height: 16px;
   font-weight: 600;
 }
 
@@ -290,5 +293,6 @@
 
   .lookbook-atc-button span {
     font-size: 16px;
+    line-height: 18px;
   }
 }

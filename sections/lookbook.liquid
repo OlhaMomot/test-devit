@@ -21,7 +21,7 @@
 <div class="section-{{ section.id }}-padding color-{{ section.settings.section_color_scheme }}">
   <div class="page-width lookbook--wrapper {% if section.settings.layout == 'text_first' %}reversed{% endif %}">
     <div class="lookbook-image">
-      <img src="{{ section.settings.image | image_url }}">
+      <img src="{{ section.settings.image | image_url }}" alt="lookbook featured image">
     </div>
 
     <div class="lookbook-text-content {% if section.settings.content_alignment == 'center' %} text-center {% elsif section.settings.content_alignment == 'right' %} text-right {% endif %}">
@@ -33,7 +33,11 @@
             </div>
 
           {% when 'button' %}
-            <button class="button lookbook-modal-button lookbook-modal-open-{{ section.id }}">
+            <button
+              class="button lookbook-modal-button lookbook-modal-open-{{ section.id }}"
+              aria-controls="lookbook-modal-{{ section.id }}"
+              aria-expanded="false"
+            >
               {{ block.settings.button_label }}
             </button>
         {% endcase %}
@@ -41,7 +45,13 @@
     </div>
   </div>
 
-  <div class="lookbook-modal lookbook-modal-{{section.id}} hidden">
+  <div
+    class="lookbook-modal lookbook-modal-{{section.id}} hidden"
+    role="dialog"
+    aria-modal="true"
+    id="lookbook-modal-{{ section.id }}"
+    aria-labelledby="lookbook-modal-title-{{ section.id }}"
+  >
     <div class="lookbook-modal--content">
       <div class="lookbook-modal-image">
         <img src="{{ section.settings.image | image_url }}" alt="{{ section.settings.image.alt | escape }}">
@@ -49,7 +59,7 @@
 
       <div class="lookbook-modal-products">
         {% for product in section.settings.products %}
-          <div class="lookbook-modal-product">
+          <div class="lookbook-modal-product" data-variant-id="{{ product.selected_or_first_available_variant.id }}">
             <div class="lookbook-modal-product-image">
               <img src="{{ product.featured_image | image_url }}" alt="{{ product.title }}">
             </div>
@@ -57,7 +67,7 @@
             <div class="lookbook-product-card-content">
               <div>
                 <div class="lookbook-product-card-header">
-                  <h5>{{ product.title }}</h5>
+                  <h5 id="lookbook-modal-title-{{ section.id }}">{{ product.title }}</h5>
 
                   {% if product.compare_at_price > product.price %}
                     <div class="lookbook-modal-price">
@@ -88,9 +98,12 @@
                       </option>
                     {% endfor %}
                   </select>
-
                 {% else %}
-                  <div class="lookbook-variant--one">One Size</div>
+                  <div
+                    class="lookbook-variant--one"
+                  >
+                    One Size
+                  </div>
                 {% endif %}
 
                 <button class="lookbook-atc-button">
@@ -106,6 +119,7 @@
           src="{{ "icon-close-small.svg" | asset_url }} "
           alt="close icon"
           class="lookbook-modal-close-btn modal-close-{{ section.id }}"
+          aria-label="Close"
         >
       </div>
     </div>
@@ -120,10 +134,14 @@
 
     function openModal() {
       modal.classList.remove('hidden');
+      openModalButtons.forEach((button) => button.setAttribute('aria-expanded', 'true'));
+      closeModalButton.focus(); // Move focus to close button for accessibility
     }
 
     function closeModal() {
       modal.classList.add('hidden');
+      openModalButtons.forEach((button) => button.setAttribute('aria-expanded', 'false'));
+      openModalButtons[0].focus(); // Return focus to the first button that opened the modal
     }
 
     openModalButtons.forEach(function (button) {
@@ -134,6 +152,12 @@
       closeModal();
     });
 
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
+        closeModal();
+      }
+    });
+
     const atcButtons = document.querySelectorAll('.lookbook-atc-button');
 
     atcButtons.forEach((button) => {
@@ -142,7 +166,11 @@
         const buttonText = button.querySelector('span');
         const productCard = event.target.closest('.lookbook-modal-product');
         const variantSelect = productCard.querySelector('.lookbook-variant-select');
-        const selectedVariantId = variantSelect.value;
+
+        // If there's a variant selector, using its value; otherwise, get the single variant ID
+        const selectedVariantId = variantSelect ? variantSelect.value : productCard.dataset.variantId;
+
+        if (!selectedVariantId) return;
 
         buttonText.innerText = '';
         loader.style.display = 'block';
